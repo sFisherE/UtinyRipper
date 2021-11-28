@@ -111,6 +111,15 @@ namespace uTinyRipper
 					throw new Exception($"Unsupported bundle signature '{Header.Signature}'");
 			}
 		}
+		public static void AlignStream(Stream steam, int alignment)
+		{
+			var pos = steam.Position;
+			var mod = pos % alignment;
+			if (mod != 0)
+			{
+				steam.Position += alignment - mod;
+			}
+		}
 
 		private void ReadFileStreamMetadata(Stream stream, long basePosition)
 		{
@@ -119,6 +128,9 @@ namespace uTinyRipper
 			{
 				stream.Position = basePosition + (header.Size - header.CompressedBlocksInfoSize);
 			}
+			//sf:new version need align
+			if ((int)(Header.Version) >= 7)
+				AlignStream(stream, 16);
 
 			CompressionType metaCompression = header.Flags.GetCompression();
 			switch (metaCompression)
